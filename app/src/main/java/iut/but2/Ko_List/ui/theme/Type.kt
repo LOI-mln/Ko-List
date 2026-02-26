@@ -1,4 +1,4 @@
-package iut.but2.`Ko-List`.ui.theme
+package iut.but2.Ko_List.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

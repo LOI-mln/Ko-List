@@ -6,12 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,7 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -77,22 +81,39 @@ fun TaskListScreen(navController: NavController, viewModel: TaskViewModel, modif
         }
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(tasks) { task ->
-                TaskItem(task = task, onClick = { navController.navigate("editTask/${task.id}") })
+                TaskItem(
+                    task = task, 
+                    onClick = { navController.navigate("editTask/${task.id}") },
+                    onCheckedChange = { viewModel.toggleTaskDone(task.id) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun TaskItem(task: Task, onClick: () -> Unit = {}) {
-    Column(
+fun TaskItem(task: Task, onClick: () -> Unit = {}, onCheckedChange: (Boolean) -> Unit = {}) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = task.title)
-        Text(text = task.description)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = task.title,
+                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None
+            )
+            Text(
+                text = task.description,
+                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None
+            )
+        }
+        Checkbox(
+            checked = task.isDone,
+            onCheckedChange = onCheckedChange
+        )
     }
 }
 

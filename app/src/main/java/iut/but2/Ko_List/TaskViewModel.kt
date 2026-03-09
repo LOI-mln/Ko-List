@@ -19,6 +19,12 @@ class TaskViewModel : ViewModel() {
         }
     }
 
+    fun toggleTaskDone(id: String) {
+        _tasks.value = _tasks.value.map { task ->
+            if (task.id == id) task.copy(isDone = !task.isDone) else task
+        }
+    }
+
     fun getTask(id: String): Task? {
         return _tasks.value.find { it.id == id }
     }

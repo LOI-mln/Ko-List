@@ -1,11 +1,21 @@
-# Android Studio generated files
+# Gradle
 .gradle/
 build/
-captures/
+caches/
+daemon/
+native/
+wrapper/
+kotlin-profile/
+
+# Android Studio / IDE
 .idea/
 *.iml
 local.properties
+.DS_Store
 
-# Keystore files
-*.jks
-*.keystore
+# Captures
+captures/
+.tmp/
+
+# App build
+app/build/

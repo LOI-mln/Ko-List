@@ -9,7 +9,17 @@ class TaskViewModel : ViewModel() {
     val tasks: StateFlow<List<Task>> = _tasks
 
     fun addTask(title: String, description: String) {
-        val newTask = Task(title, description)
+        val newTask = Task(title = title, description = description)
         _tasks.value = _tasks.value + newTask
+    }
+
+    fun updateTask(id: String, title: String, description: String) {
+        _tasks.value = _tasks.value.map { task ->
+            if (task.id == id) task.copy(title = title, description = description) else task
+        }
+    }
+
+    fun getTask(id: String): Task? {
+        return _tasks.value.find { it.id == id }
     }
 }

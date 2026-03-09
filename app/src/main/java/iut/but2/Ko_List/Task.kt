@@ -1,3 +1,9 @@
 package iut.but2.Ko_List
 
-data class Task(val title: String, val description: String)
+import java.util.UUID
+
+data class Task(
+    val id: String = UUID.randomUUID().toString(),
+    val title: String, 
+    val description: String
+)

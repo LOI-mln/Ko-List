@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,6 +58,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable("addTask") {
             AddTaskScreen(navController = navController, viewModel = taskViewModel)
         }
+        composable("editTask/{taskId}") { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getString("taskId")
+            if (taskId != null) {
+                EditTaskScreen(navController = navController, viewModel = taskViewModel, taskId = taskId)
+            }
+        }
     }
 }
 
@@ -70,15 +77,20 @@ fun TaskListScreen(navController: NavController, viewModel: TaskViewModel, modif
         }
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(tasks) { task ->
-                TaskItem(task = task)
+                TaskItem(task = task, onClick = { navController.navigate("editTask/${task.id}") })
             }
         }
     }
 }
 
 @Composable
-fun TaskItem(task: Task) {
-    Column(modifier = Modifier.padding(16.dp)) {
+fun TaskItem(task: Task, onClick: () -> Unit = {}) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
         Text(text = task.title)
         Text(text = task.description)
     }
@@ -128,5 +140,42 @@ fun TaskListScreenPreview() {
 fun AddTaskScreenPreview() {
     MyApplicationTheme {
         AddTaskScreen(navController = rememberNavController(), viewModel = viewModel())
+    }
+}
+
+@Composable
+fun EditTaskScreen(navController: NavController, viewModel: TaskViewModel, taskId: String, modifier: Modifier = Modifier) {
+    val task = viewModel.getTask(taskId)
+    if (task == null) {
+        navController.popBackStack()
+        return
+    }
+
+    var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description) }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Titre") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Description") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(onClick = {
+            viewModel.updateTask(taskId, title, description)
+            navController.popBackStack()
+        }) {
+            Text("Mettre à jour")
+        }
     }
 }

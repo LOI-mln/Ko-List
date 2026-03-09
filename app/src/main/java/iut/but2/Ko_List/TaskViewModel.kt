@@ -43,15 +43,17 @@ class TaskViewModel : ViewModel() {
         _tasks.value = _tasks.value.map { task ->
             if (task.id == id) {
                 val newStatus = !task.isDone
-                if (newStatus) {
+                var newHasGrantedXp = task.hasGrantedXp
+                if (newStatus && !task.hasGrantedXp) {
                     val xpGained = when(task.priority) {
                         Priority.HIGH -> 50
                         Priority.MEDIUM -> 20
                         Priority.LOW -> 10
                     }
                     _userXp.value += xpGained
+                    newHasGrantedXp = true
                 }
-                task.copy(isDone = newStatus)
+                task.copy(isDone = newStatus, hasGrantedXp = newHasGrantedXp)
             } else task
         }
     }

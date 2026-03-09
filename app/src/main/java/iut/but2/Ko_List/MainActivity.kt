@@ -268,6 +268,12 @@ fun AddTaskScreen(navController: NavController, viewModel: TaskViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
+            OutlinedTextField(
+                value = rawDate, onValueChange = { rawDate = it },
+                label = { Text("Échéance (jj/mm/aaaa)") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            )
             
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
@@ -352,6 +358,7 @@ fun EditTaskScreen(navController: NavController, viewModel: TaskViewModel, taskI
         Column(modifier = Modifier.padding(padding).fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Titre") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
             OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Description") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
+            OutlinedTextField(value = rawDate, onValueChange = { rawDate = it }, label = { Text("Échéance (jj/mm/aaaa)") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(onClick = { launcher.launch("image/*") }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {

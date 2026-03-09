@@ -14,5 +14,6 @@ data class Task(
     val dueDate: Long? = null,
     val periodicity: Periodicity = Periodicity.NONE,
     val priority: Priority = Priority.MEDIUM,
-    val imageUri: String? = null
+    val imageUri: String? = null,
+    val hasGrantedXp: Boolean = false
 )

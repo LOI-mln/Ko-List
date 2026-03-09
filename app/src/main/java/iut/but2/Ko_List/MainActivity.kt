@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +26,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -113,6 +117,8 @@ fun FilterButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
 
 @Composable
 fun TaskItem(task: Task, onClick: () -> Unit = {}, onCheckedChange: (Boolean) -> Unit = {}) {
+    val isOverdue = task.dueDate != null && task.dueDate < System.currentTimeMillis() && !task.isDone
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -123,12 +129,22 @@ fun TaskItem(task: Task, onClick: () -> Unit = {}, onCheckedChange: (Boolean) ->
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = task.title,
-                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None
+                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = task.description,
-                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None
+                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
             )
+            if (task.dueDate != null) {
+                val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                Text(
+                    text = "Échéance : ${dateFormat.format(Date(task.dueDate))}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         Checkbox(
             checked = task.isDone,
@@ -141,6 +157,7 @@ fun TaskItem(task: Task, onClick: () -> Unit = {}, onCheckedChange: (Boolean) ->
 fun AddTaskScreen(navController: NavController, viewModel: TaskViewModel, modifier: Modifier = Modifier) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var rawDate by remember { mutableStateOf("") } // Format attendu: jj/mm/aaaa
 
     Column(
         modifier = modifier
@@ -159,10 +176,28 @@ fun AddTaskScreen(navController: NavController, viewModel: TaskViewModel, modifi
             label = { Text("Description") },
             modifier = Modifier.fillMaxWidth()
         )
-        Button(onClick = {
-            viewModel.addTask(title, description)
-            navController.popBackStack()
-        }) {
+        OutlinedTextField(
+            value = rawDate,
+            onValueChange = { rawDate = it },
+            label = { Text("Échéance (jj/mm/aaaa) optionnel") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = {
+                var parsedDate: Long? = null
+                if (rawDate.isNotBlank()) {
+                    try {
+                        val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        parsedDate = format.parse(rawDate)?.time
+                    } catch (e: Exception) {
+                        // Ignoré si format invalide pour la simplicité
+                    }
+                }
+                viewModel.addTask(title, description, parsedDate)
+                navController.popBackStack()
+            },
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
             Text("Enregistrer")
         }
     }
@@ -194,6 +229,11 @@ fun EditTaskScreen(navController: NavController, viewModel: TaskViewModel, taskI
 
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description) }
+    var rawDate by remember { 
+        mutableStateOf(
+            if (task.dueDate != null) SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(task.dueDate)) else ""
+        ) 
+    }
 
     Column(
         modifier = modifier
@@ -212,10 +252,28 @@ fun EditTaskScreen(navController: NavController, viewModel: TaskViewModel, taskI
             label = { Text("Description") },
             modifier = Modifier.fillMaxWidth()
         )
-        Button(onClick = {
-            viewModel.updateTask(taskId, title, description)
-            navController.popBackStack()
-        }) {
+        OutlinedTextField(
+            value = rawDate,
+            onValueChange = { rawDate = it },
+            label = { Text("Échéance (jj/mm/aaaa) optionnel") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = {
+                var parsedDate: Long? = null
+                if (rawDate.isNotBlank()) {
+                    try {
+                        val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        parsedDate = format.parse(rawDate)?.time
+                    } catch (e: Exception) {
+                        // Ignoré
+                    }
+                }
+                viewModel.updateTask(taskId, title, description, parsedDate)
+                navController.popBackStack()
+            },
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
             Text("Mettre à jour")
         }
     }

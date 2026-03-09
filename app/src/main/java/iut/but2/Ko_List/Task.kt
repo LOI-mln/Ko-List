@@ -6,7 +6,8 @@ data class Task(
     val id: String = UUID.randomUUID().toString(),
     val title: String, 
     val description: String,
-    val isDone: Boolean = false
+    val isDone: Boolean = false,
+    val dueDate: Long? = null
 )
 
 enum class TaskFilter {

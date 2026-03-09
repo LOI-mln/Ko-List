@@ -27,14 +27,14 @@ class TaskViewModel : ViewModel() {
         _filter.value = newFilter
     }
 
-    fun addTask(title: String, description: String) {
-        val newTask = Task(title = title, description = description)
+    fun addTask(title: String, description: String, dueDate: Long? = null) {
+        val newTask = Task(title = title, description = description, dueDate = dueDate)
         _tasks.value = _tasks.value + newTask
     }
 
-    fun updateTask(id: String, title: String, description: String) {
+    fun updateTask(id: String, title: String, description: String, dueDate: Long? = null) {
         _tasks.value = _tasks.value.map { task ->
-            if (task.id == id) task.copy(title = title, description = description) else task
+            if (task.id == id) task.copy(title = title, description = description, dueDate = dueDate) else task
         }
     }
 

@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -119,37 +123,45 @@ fun FilterButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
 fun TaskItem(task: Task, onClick: () -> Unit = {}, onCheckedChange: (Boolean) -> Unit = {}) {
     val isOverdue = task.dueDate != null && task.dueDate < System.currentTimeMillis() && !task.isDone
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    AnimatedVisibility(
+        visible = true,
+        enter = fadeIn(animationSpec = tween(500)),
+        exit = fadeOut(animationSpec = tween(500))
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = task.title,
-                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = task.description,
-                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-            )
-            if (task.dueDate != null) {
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClick() }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Échéance : ${dateFormat.format(Date(task.dueDate))}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    text = task.title,
+                    textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                    color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                 )
+                Text(
+                    text = task.description,
+                    textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                    color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                )
+                if (task.dueDate != null) {
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                    Text(
+                        text = "Échéance : ${dateFormat.format(Date(task.dueDate))}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
+            Checkbox(
+                checked = task.isDone,
+                onCheckedChange = { isChecked ->
+                    onCheckedChange(isChecked)
+                }
+            )
         }
-        Checkbox(
-            checked = task.isDone,
-            onCheckedChange = onCheckedChange
-        )
     }
 }
 

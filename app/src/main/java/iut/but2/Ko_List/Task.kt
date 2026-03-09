@@ -8,3 +8,9 @@ data class Task(
     val description: String,
     val isDone: Boolean = false
 )
+
+enum class TaskFilter {
+    ALL,
+    TODO,
+    DONE
+}

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -73,11 +74,17 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
 @Composable
 fun TaskListScreen(navController: NavController, viewModel: TaskViewModel, modifier: Modifier = Modifier) {
-    val tasks by viewModel.tasks.collectAsState()
+    val tasks by viewModel.filteredTasks.collectAsState()
+    val currentFilter by viewModel.filter.collectAsState()
 
     Column(modifier = modifier.fillMaxSize()) {
         Button(onClick = { navController.navigate("addTask") }, modifier = Modifier.padding(16.dp)) {
             Text("Ajouter une tâche")
+        }
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            FilterButton("Toutes", currentFilter == TaskFilter.ALL) { viewModel.setFilter(TaskFilter.ALL) }
+            FilterButton("À faire", currentFilter == TaskFilter.TODO) { viewModel.setFilter(TaskFilter.TODO) }
+            FilterButton("Terminées", currentFilter == TaskFilter.DONE) { viewModel.setFilter(TaskFilter.DONE) }
         }
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(tasks) { task ->
@@ -88,6 +95,19 @@ fun TaskListScreen(navController: NavController, viewModel: TaskViewModel, modif
                 )
             }
         }
+    }
+}
+
+@Composable
+fun FilterButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) androidx.compose.material3.MaterialTheme.colorScheme.primary else androidx.compose.material3.MaterialTheme.colorScheme.secondary
+        ),
+        modifier = Modifier.padding(end = 8.dp)
+    ) {
+        Text(text)
     }
 }
 

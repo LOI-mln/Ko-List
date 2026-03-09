@@ -27,21 +27,32 @@ class TaskViewModel : ViewModel() {
         _filter.value = newFilter
     }
 
-    fun addTask(title: String, description: String, dueDate: Long? = null) {
-        val newTask = Task(title = title, description = description, dueDate = dueDate)
+    fun addTask(title: String, description: String, dueDate: Long? = null, periodicity: Periodicity = Periodicity.NONE) {
+        val newTask = Task(title = title, description = description, dueDate = dueDate, periodicity = periodicity)
         _tasks.value = _tasks.value + newTask
     }
 
-    fun updateTask(id: String, title: String, description: String, dueDate: Long? = null) {
+    fun updateTask(id: String, title: String, description: String, dueDate: Long? = null, periodicity: Periodicity = Periodicity.NONE) {
         _tasks.value = _tasks.value.map { task ->
-            if (task.id == id) task.copy(title = title, description = description, dueDate = dueDate) else task
+            if (task.id == id) task.copy(title = title, description = description, dueDate = dueDate, periodicity = periodicity) else task
         }
     }
 
     fun toggleTaskDone(id: String) {
         _tasks.value = _tasks.value.map { task ->
-            if (task.id == id) task.copy(isDone = !task.isDone) else task
+            if (task.id == id) {
+                val isDone = !task.isDone
+                // Si la tâche est marquée comme faite et qu'elle est périodique,
+                // on pourrait imaginer un comportement plus complexe (ex: créer la suivante).
+                // Pour l'instant, on se contente de changer l'état.
+                task.copy(isDone = isDone)
+            } else task
         }
+    }
+
+    // --- Version 3 : Purge des tâches effectuées ---
+    fun clearDoneTasks() {
+        _tasks.value = _tasks.value.filter { !it.isDone }
     }
 
     fun getTask(id: String): Task? {

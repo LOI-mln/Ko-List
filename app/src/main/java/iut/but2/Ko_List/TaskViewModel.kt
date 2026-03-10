@@ -15,7 +15,41 @@ class TaskViewModel : ViewModel() {
     private val _userXp = MutableStateFlow(0)
     val userXp: StateFlow<Int> = _userXp
 
-    val userLevel: StateFlow<Int> = _userXp.map { (it / 100) + 1 }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+    // Calcul du niveau (RPG Style)
+    // Base 100, chaque niveau demande 50% d'XP de plus que le précédent.
+    // Niveau 1 -> 2 : 100 XP
+    // Niveau 2 -> 3 : 150 XP
+    // Niveau 3 -> 4 : 225 XP
+    val userLevelInfo: StateFlow<LevelInfo> = _userXp.map { xp ->
+        var currentLevel = 1
+        var xpRequiredForCurrentLevel = 100
+        var totalXpForNextLevel = 100
+        var xpAccumulatedForPreviousLevels = 0
+
+        var remainingXp = xp
+        while (remainingXp >= xpRequiredForCurrentLevel) {
+            remainingXp -= xpRequiredForCurrentLevel
+            xpAccumulatedForPreviousLevels += xpRequiredForCurrentLevel
+            currentLevel++
+            xpRequiredForCurrentLevel = (xpRequiredForCurrentLevel * 1.5).toInt()
+            totalXpForNextLevel = xpAccumulatedForPreviousLevels + xpRequiredForCurrentLevel
+        }
+
+        val title = when (currentLevel) {
+            in 1..4 -> "Novice de l'Organisation"
+            in 5..9 -> "Apprenti Planificateur"
+            in 10..19 -> "Expert en Productivité"
+            in 20..34 -> "Maître des Tâches"
+            else -> "Légende du Temps"
+        }
+
+        LevelInfo(
+            level = currentLevel,
+            title = title,
+            xpInCurrentLevel = remainingXp, // XP purely in the current bracket
+            xpRequiredForNextLevel = xpRequiredForCurrentLevel // XP total required IN this bracket
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LevelInfo(1, "Novice de l'Organisation", 0, 100))
 
     val filteredTasks: StateFlow<List<Task>> = combine(_tasks, _filter) { taskList, currentFilter ->
         val list = when (currentFilter) {
@@ -46,9 +80,9 @@ class TaskViewModel : ViewModel() {
                 var newHasGrantedXp = task.hasGrantedXp
                 if (newStatus && !task.hasGrantedXp) {
                     val xpGained = when(task.priority) {
-                        Priority.HIGH -> 50
-                        Priority.MEDIUM -> 20
-                        Priority.LOW -> 10
+                        Priority.HIGH -> 100
+                        Priority.MEDIUM -> 50
+                        Priority.LOW -> 25
                     }
                     _userXp.value += xpGained
                     newHasGrantedXp = true
@@ -60,5 +94,14 @@ class TaskViewModel : ViewModel() {
 
     fun clearDoneTasks() { _tasks.value = _tasks.value.filter { !it.isDone } }
 
+    fun removeTask(id: String) { _tasks.value = _tasks.value.filter { it.id != id } }
+
     fun getTask(id: String): Task? = _tasks.value.find { it.id == id }
 }
+
+data class LevelInfo(
+    val level: Int,
+    val title: String,
+    val xpInCurrentLevel: Int,
+    val xpRequiredForNextLevel: Int
+)

@@ -16,14 +16,13 @@ class TaskViewModel : ViewModel() {
     val userXp: StateFlow<Int> = _userXp
 
     // Calcul du niveau (RPG Style)
-    // Base 100, chaque niveau demande 50% d'XP de plus que le précédent.
+    // Progression plus douce : Base 100, +50 XP requis par niveau supplémentaire.
     // Niveau 1 -> 2 : 100 XP
     // Niveau 2 -> 3 : 150 XP
-    // Niveau 3 -> 4 : 225 XP
+    // Niveau 3 -> 4 : 200 XP
     val userLevelInfo: StateFlow<LevelInfo> = _userXp.map { xp ->
         var currentLevel = 1
         var xpRequiredForCurrentLevel = 100
-        var totalXpForNextLevel = 100
         var xpAccumulatedForPreviousLevels = 0
 
         var remainingXp = xp
@@ -31,8 +30,7 @@ class TaskViewModel : ViewModel() {
             remainingXp -= xpRequiredForCurrentLevel
             xpAccumulatedForPreviousLevels += xpRequiredForCurrentLevel
             currentLevel++
-            xpRequiredForCurrentLevel = (xpRequiredForCurrentLevel * 1.5).toInt()
-            totalXpForNextLevel = xpAccumulatedForPreviousLevels + xpRequiredForCurrentLevel
+            xpRequiredForCurrentLevel += 50 // Augmentation linéaire au lieu d'exponentielle
         }
 
         val title = when (currentLevel) {

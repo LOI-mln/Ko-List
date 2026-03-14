@@ -44,8 +44,8 @@ Ko-List est une application Android de gestion de tâches (To-Do List) intégran
 
 ## Démonstration
 
-Une séquence vidéo illustrant l'ensemble du parcours utilisateur, incluant la création d'une tâche et le passage de niveau, est jointe aux livrables de ce projet.
+Une séquence vidéo illustrant l'ensemble du parcours utilisateur, incluant la création d'une tâche et le passage de niveau, est disponible ci-dessous :
 
-<video src="Vidéo de presentation.mov" controls width="100%"></video>
+[▶️ Cliquez ici pour regarder la vidéo de présentation (presentation.mov)](presentation.mov)
 
-[Si la vidéo ne s'affiche pas, cliquez ici pour l'ouvrir](Vidéo%20de%20presentation.mov)
+<video src="presentation.mov" controls width="100%"></video>
